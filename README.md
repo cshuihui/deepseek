@@ -1,3 +1,5 @@
 人工智能领域新手，正在以python探索deepseek的多种用法
 
 run.bat使用的是上一级的虚拟环境里的python
+
+我最喜欢纳西妲
