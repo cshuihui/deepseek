@@ -48,7 +48,7 @@ if user_input := st.chat_input("你想对纳西妲说什么呢"):
 
                 if response.status_code == 200:
                     assistant_response = response.json()['choices'][0]['message']['content']  # 这是云端deepseek返回的格式
-                    #assistant_response = response.json()['message']['content']  # 这是本地
+                    #assistant_response = response.json()['message']['content']  # 这是本地api调用格式
                     st.markdown(assistant_response)
                     st.session_state.message.append(
                         {'role': 'assistant', 'content': assistant_response}
