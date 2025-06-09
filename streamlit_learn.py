@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import json
 import deepseek_api_import as dp
+import time
 
 st.title("欢迎来到提瓦特")
 
@@ -20,6 +21,11 @@ headers = {
     "Authorization": f'Bearer {api_key}',
     "Content-Type": 'application/json'
 }
+
+place = st.empty()
+place.write("思考中……")
+time.sleep(2)
+place.markdown("纳西妲喜欢你哦")
 
 # 用户输入
 if user_input := st.chat_input("你想对纳西妲说什么呢"):
