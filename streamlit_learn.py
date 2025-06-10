@@ -1,10 +1,28 @@
 import streamlit as st
 import requests
 import json
-import deepseek_api_import as dp
 import time
 
-st.title("欢迎来到提瓦特")
+load_history = 'chat_history.json'
+st.header("欢迎来到提瓦特")
+# place_button, place1_button= st.columns([1, 2])
+
+
+api_key = "sk-6a1c0fcd1d634479b329784befac3b64"
+headers = {
+    "Authorization": f'Bearer {api_key}',
+    "Content-Type": 'application/json'
+}
+
+
+def button_init(need_init_buttons):  # 给需要更新的按钮初始化状态
+    for button in need_init_buttons:
+        if button not in st.session_state:
+            st.session_state[button] = False
+
+
+renew_buttons = []
+button_init(renew_buttons)
 
 # 初始化会话状态
 if 'message' not in st.session_state:
@@ -16,16 +34,33 @@ for message in st.session_state.message:
 # deepseek_api_url = "http://localhost:11434/api/chat"  # 本地部署
 deepseek_api_url = 'https://api.deepseek.com/v1/chat/completions'  # 云端api
 
-api_key = "sk-6a1c0fcd1d634479b329784befac3b64"
-headers = {
-    "Authorization": f'Bearer {api_key}',
-    "Content-Type": 'application/json'
-}
+# 侧边栏
 
-place = st.empty()
-place.write("思考中……")
-time.sleep(2)
-place.markdown("纳西妲喜欢你哦")
+
+sidebar_button = ['place1', 'place']
+button_init(sidebar_button)
+
+# empty()使用
+place = st.sidebar.empty()
+with place:  # with语句里面不允许使用海象运算符
+    if st.button("尝试点一下"):
+        st.session_state['place'] = True
+    if st.session_state['place']:
+        place.write("思考中……")
+        time.sleep(2)
+        place.markdown("纳西妲喜欢你哦")
+        st.session_state['place'] = False
+
+# container()使用
+place1 = st.sidebar.container()
+with place1:
+    if st.button("再尝试点一下"):  # 在streamlit里用while会卡死
+        st.session_state['place1'] = True
+    if st.session_state['place1']:
+        place1.write("思考中……")
+        time.sleep(2)
+        place1.markdown("纳西妲很喜欢你哦")
+        st.session_state['place1'] = False
 
 # 用户输入
 if user_input := st.chat_input("你想对纳西妲说什么呢"):
@@ -42,8 +77,8 @@ if user_input := st.chat_input("你想对纳西妲说什么呢"):
                     url=f'{deepseek_api_url}',
                     headers=headers,
                     json={
-                        'model': 'deepseek-reasoner',
-                        #'model': 'deepseek-r1:8b',
+                        'model': 'deepseek-chat',
+                        # 'model': 'deepseek-r1:8b',
                         'messages': [
                             {'role': m['role'], "content": m['content']}  # 这里是列表推导式
                             for m in st.session_state.message  # 上一行为表达式，下一行是循环语句
@@ -54,7 +89,7 @@ if user_input := st.chat_input("你想对纳西妲说什么呢"):
 
                 if response.status_code == 200:
                     assistant_response = response.json()['choices'][0]['message']['content']  # 这是云端deepseek返回的格式
-                    #assistant_response = response.json()['message']['content']  # 这是本地api调用格式
+                    # assistant_response = response.json()['message']['content']  # 这是本地api调用格式
                     st.markdown(assistant_response)
                     st.session_state.message.append(
                         {'role': 'assistant', 'content': assistant_response}
@@ -65,6 +100,7 @@ if user_input := st.chat_input("你想对纳西妲说什么呢"):
                     st.error(response.text)
             except Exception as e:  # Exception 是所有普通错误的“妈妈类”，能抓住大部分的错误
                 st.error(f'发生错误：{str(e)}')
-if st.button("清除聊天记录"):
-    st.session_state.message = []
-    st.rerun()
+with st.sidebar.container():
+    if st.button("清除聊天记录"):
+        st.session_state.message = []
+        st.rerun()
